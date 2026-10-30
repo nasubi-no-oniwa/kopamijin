@@ -265,7 +265,7 @@ const TX = {
     shareT: 'I blew the {s} to smithereens with {c} C4 in {t} s! {p} pts', tags: '#木っ端みじん',
   },
   zh: {
-    title: '粉身碎骨', back: '返回', undo: '退回1個', boom: '起爆', ruby: '木っ端みじん', logo: '粉身<span>碎骨</span>', sub: '貼上C4，引爆。',
+    title: '粉身碎骨', back: '返回', undo: '退回1個', boom: '起爆', ruby: 'KOPPA MIJIN', logo: '粉身<span>碎骨</span>', sub: '貼上C4，引爆。',
     play: '去爆破', rank: '排行榜', how: '玩法', sndOn: '聲音：開', sndOff: '聲音：關', pick: '要炸掉哪個？', close: '關閉',
     how1: '在畫面左側滑動前進，右側滑動環顧四周。▲▼上下飛', how2: '點一下看得到的地方，C4就會貼在那裡。可以放任意個', how3: '按「起爆」一起炸。有剩下的話，可以再貼再炸', how4: '炸飛90%的方塊就是粉身碎骨。C4越少、越快，分數越高',
     clear: '粉身碎骨！', endSub: '炸掉了「{s}」', namePh: '名字（最多12字）', send: '登錄', share: '發到X', next: '下一關', again: '再一次', stages: '關卡', rankT: '排行榜',
@@ -279,7 +279,7 @@ const TX = {
     shareT: '用C4 {c}個・{t}秒把「{s}」炸得粉身碎骨！ {p}分', tags: '#木っ端みじん',
   },
   ko: {
-    title: '산산조각', back: '뒤로', undo: '1개 취소', boom: '기폭', ruby: '木っ端みじん', logo: '산산<span>조각</span>', sub: 'C4를 붙이고, 기폭.',
+    title: '산산조각', back: '뒤로', undo: '1개 취소', boom: '기폭', ruby: 'KOPPA MIJIN', logo: '산산<span>조각</span>', sub: 'C4를 붙이고, 기폭.',
     play: '폭파하러 가기', rank: '랭킹', how: '하는 법', sndOn: '소리: 켜짐', sndOff: '소리: 꺼짐', pick: '무엇을 날려 버릴까?', close: '닫기',
     how1: '화면 왼쪽을 문지르면 앞으로, 오른쪽을 문지르면 둘러본다. ▲▼로 위아래로 난다', how2: '보이는 곳을 탭하면 거기에 C4가 붙는다. 몇 개든 놓을 수 있다', how3: '「기폭」으로 한꺼번에 쾅. 남으면 또 붙여서 기폭할 수 있다', how4: '블록의 90%를 날리면 산산조각. C4가 적고 빠를수록 높은 점수',
     clear: '산산조각!', endSub: '「{s}」을 날려 버렸다', namePh: '이름(12자까지)', send: '등록', share: 'X에 올리기', next: '다음 스테이지', again: '한 번 더', stages: '스테이지', rankT: '랭킹',
@@ -422,7 +422,7 @@ const STAGES = [
       M.box(-10, -8, 3, 4, -2, 2, TANK, 1);
     } },
   { // 4 トラック
-    s: .28, R: 1.9, mk(M) {
+    s: .28, R: 2.2, mk(M) {
       M.box(-13, 13, 2, 2, -4, 4, 0x2a2a30);
       M.shell(7, 13, 3, 10, -4, 4, 0x3aa0ff); M.box(13, 13, 6, 9, -3, 3, 0x9fe3ff); M.box(8, 12, 6, 9, -4, -4, 0x9fe3ff); M.box(8, 12, 6, 9, 4, 4, 0x9fe3ff);
       M.shell(-13, 6, 3, 12, -4, 4, 0xf4f4f0); M.paint(-13, 6, 6, 7, -4, 4, 0xff3b3b);
