@@ -862,7 +862,7 @@ function flash(v) { flashV = Math.max(flashV, v); }
 const SHAKE = { a: 0 }; function shake(a) { SHAKE.a = Math.max(SHAKE.a, a); }
 const SLOW = { t: 0, k: 1 };
 const BAT = { st: 0, t: 0, c4: 0, running: false, done: false, tut: 0, look: 0, checkT: 0 };
-const best = () => lsGet('kp_best') || {};
+const best = () => lsGet('kp_best2') || {};
 function stName(i) { return tr('st' + (i + 1)); }
 function ui() {
   $('#stName').textContent = (BAT.st + 1) + '. ' + stName(BAT.st);
@@ -907,7 +907,7 @@ function success() {
   inputReset(); mode = 'end'; hud(false); hint(''); showTut('');
   BAT.t = Math.max(1, BAT.t);
   const i = BAT.st, t = Math.round(BAT.t * 10) / 10, c = BAT.c4, p = score(c, t);
-  const b = best(), old = b[i]; const nb = !old || p > old.p; if (nb) { b[i] = { p, c, t }; lsSet('kp_best', b); }
+  const b = best(), old = b[i]; const nb = !old || p > old.p; if (nb) { b[i] = { p, c, t }; lsSet('kp_best2', b); }
   const newGold = !GOLD && isGold(); if (newGold) GOLD = true; $('#goldMsg').hidden = !newGold;
   last = { st: i, p, c, t, ms: Math.round(BAT.t * 1000) };
   $('#endSub').textContent = tr('endSub', { s: stName(i) });
@@ -945,7 +945,7 @@ document.querySelectorAll('.langs button').forEach(b => b.onclick = () => { LANG
 
 /* ===================== ランキング（面ごと・点の高い順） ===================== */
 const FB = { apiKey: 'AIzaSyCMwGPHPKsDByV07QPq56-PGXTDxcYVNfc', databaseURL: 'https://furoya-no-onna-default-rtdb.asia-southeast1.firebasedatabase.app' };
-const RANK = 'kopamijin/st/';
+const RANK = 'kopamijin/st2/'; // 火力を下げたので作り直し
 async function fbAuth() {
   let a = lsGet('kp_auth'); if (a && a.exp > Date.now() + 60000) return a;
   if (a && a.refresh) {
