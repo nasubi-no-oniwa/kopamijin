@@ -76,6 +76,15 @@ button.chip{cursor:pointer}
 #boom b{position:absolute;right:-4px;top:-4px;min-width:30px;height:30px;border-radius:15px;background:var(--yel);color:var(--ink);font:400 16px var(--disp);display:grid;place-items:center;padding:0 6px;box-shadow:0 2px 0 #000}
 #boom:active i{transform:translateY(3px)}
 #boom.dis{filter:grayscale(.7) brightness(.8)}
+/* 動画 */
+#hud2{position:absolute;left:calc(env(safe-area-inset-left,0px) + 10px);top:calc(env(safe-area-inset-top,0px) + 64px);pointer-events:none}
+#hud2>*{pointer-events:auto}
+#vidBtn{font-size:13px;padding:7px 11px;border:2px solid var(--yel)}
+#vidBtn:disabled{opacity:.75;border-color:#ff4040}
+#vid{display:block;width:auto;max-width:100%;max-height:42vh;margin:10px auto 0;border-radius:10px;background:#000}
+.gold{margin:6px 0 0;text-align:center;font-weight:900;color:#ffd21f;text-shadow:0 0 10px rgba(255,190,40,.9),0 1px 2px #000}
+.big-gold{font-size:17px;animation:goldp 1s ease-in-out infinite alternate}
+@keyframes goldp{from{transform:scale(1)}to{transform:scale(1.06)}}
 /* ぷにコン */
 #stick{position:absolute;left:calc(env(safe-area-inset-left,0px) + 18px);bottom:calc(env(safe-area-inset-bottom,0px) + 22px);width:132px;height:132px;border-radius:50%;border:3px solid rgba(255,255,255,.55);background:rgba(20,20,24,.38);touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
 #stick::before{content:'';position:absolute;inset:-14px;border-radius:50%}
@@ -155,6 +164,7 @@ button.chip{cursor:pointer}
     <div class="chip" id="stInfo"><b id="stName"></b><span id="stPct"></span><div id="bar"><div id="barFill"></div></div></div>
     <div class="chip" id="timeBox"><b id="tTime">0.0</b><span id="tC4"></span></div>
   </div>
+  <div id="hud2"><button class="chip" id="vidBtn" hidden></button></div>
   <div id="hint" hidden></div>
   <div id="tut" hidden></div>
   <div id="msg" hidden><div id="msgBig"></div><div id="msgSub"></div></div>
@@ -183,6 +193,7 @@ button.chip{cursor:pointer}
   <div class="overlay" id="stageP" hidden>
     <div class="card">
       <h2 data-i="pick">どれを吹き飛ばす？</h2>
+      <p class="gold" id="goldBadge" hidden data-i="goldBadge">★ 金のC4</p>
       <div class="stg" id="stgList"></div>
       <button class="big alt" id="stBack" data-i="back">もどる</button>
     </div>
@@ -209,11 +220,25 @@ button.chip{cursor:pointer}
       <p class="sub" id="endSub"></p>
       <div class="stats" id="endStats"></div>
       <p class="note" id="endBest"></p>
+      <p class="gold big-gold" id="goldMsg" hidden data-i="gold">全ステージ制覇！ C4が金色になった</p>
+      <button class="big yel" id="endVid"></button>
       <div class="field"><input id="nameIn" maxlength="12" autocomplete="off" data-ip="namePh" placeholder="名前（12文字まで）"><button id="send" data-i="send">登録</button></div>
       <p class="note" id="sendMsg"></p>
       <button class="big x" id="share" data-i="share">Xに投稿</button>
       <button class="big yel" id="endNext" data-i="next">次のステージへ</button>
       <div class="row2"><button class="big alt" id="endAgain" data-i="again">もう一回</button><button class="big alt" id="endStage" data-i="stages">ステージ</button></div>
+    </div>
+  </div>
+
+  <!-- 爆発の動画 -->
+  <div class="overlay" id="vidP" hidden>
+    <div class="card">
+      <h2 data-i="vidT">爆発の動画</h2>
+      <video id="vid" playsinline muted loop autoplay controls></video>
+      <button class="big x" id="vidShare" data-i="vidShare">動画つきでXに投稿</button>
+      <button class="big alt" id="vidSave" data-i="vidSave">動画を保存</button>
+      <p class="note" id="vidNote"></p>
+      <button class="big alt" id="vidClose" data-i="close">とじる</button>
     </div>
   </div>
 
@@ -240,6 +265,7 @@ const QS = new URLSearchParams(location.search);
 const GAME_URL = 'https://nasubi-no-oniwa.github.io/kopamijin/';
 const TX = {
   ja: {
+    vidT: '爆発の動画', vidBtn: '🎬 爆発の動画', vidRec: '● 録画中', vidSee: '🎬 爆発の動画を見る', vidMaking: '動画をつくっています…', vidShare: '動画つきでXに投稿', vidSave: '動画を保存', vidSaved: '保存しました', vidPc: '動画を保存しました。開いた投稿画面に、その動画を添付してね', vidWebm: 'この動画の形式（webm）は、Xに上げられないことがあります', shareV: '「{s}」をC4で吹き飛ばした！', gold: '全ステージ制覇！ C4が金色になった', goldBadge: '★ 金のC4',
     title: '木っ端みじん', back: 'もどる', undo: '1つ戻す', boom: '起爆', ruby: 'こっぱみじん', logo: '木っ端<span>みじん</span>', sub: 'C4をくっつけて、起爆。',
     play: '爆破しに行く', rank: 'ランキング', how: '遊び方', sndOn: '音：あり', sndOff: '音：なし', pick: 'どれを吹き飛ばす？', close: 'とじる',
     how1: '左下のスティックで進む。画面をなぞると見回す。▲▼で上下に飛ぶ', how2: '見えている所をタップすると、そこにC4がくっつく。何個でも置ける', how3: '「起爆」でまとめてドカン。残ったら、またくっつけて起爆できる', how4: 'ブロックの90%を吹き飛ばしたら木っ端みじん。C4が少なく、早いほど高い点',
@@ -254,6 +280,7 @@ const TX = {
     shareT: '「{s}」をC4 {c}個・{t}秒で木っ端みじんにした！ {p}点', tags: '#木っ端みじん',
   },
   en: {
+    vidT: 'Explosion video', vidBtn: '🎬 Video', vidRec: '● REC', vidSee: '🎬 Watch the explosion', vidMaking: 'Making the video…', vidShare: 'Post to X with video', vidSave: 'Save video', vidSaved: 'Saved', vidPc: 'Video saved. Attach it to the post window that just opened', vidWebm: 'This video format (webm) may not upload to X', shareV: 'I blew up the {s} with C4!', gold: 'All stages cleared! Your C4 is now gold', goldBadge: '★ Gold C4',
     title: 'Smithereens', back: 'Back', undo: 'Undo', boom: 'BOOM', ruby: 'KOPPA MIJIN', logo: 'Smither<span>eens</span>', sub: 'Stick on C4. Hit the button.',
     play: 'Go blow stuff up', rank: 'Rankings', how: 'How to play', sndOn: 'Sound: on', sndOff: 'Sound: off', pick: 'What are we blowing up?', close: 'Close',
     how1: 'Use the stick at the bottom left to move, slide on the screen to look around. ▲▼ to go up and down', how2: 'Tap anything you can see to stick C4 there. Place as many as you like', how3: 'Hit BOOM to set them all off. If something is left, stick more and blow it again', how4: 'Blow away 90% of the blocks to reduce it to smithereens. Fewer C4 and less time means more points',
@@ -268,6 +295,7 @@ const TX = {
     shareT: 'I blew the {s} to smithereens with {c} C4 in {t} s! {p} pts', tags: '#木っ端みじん',
   },
   zh: {
+    vidT: '爆炸影片', vidBtn: '🎬 爆炸影片', vidRec: '● 錄影中', vidSee: '🎬 看爆炸影片', vidMaking: '正在製作影片…', vidShare: '附影片發到X', vidSave: '儲存影片', vidSaved: '已儲存', vidPc: '影片已儲存。請在打開的發文畫面附上影片', vidWebm: '這種影片格式（webm）可能無法上傳到X', shareV: '用C4炸飛了「{s}」！', gold: '全關卡制霸！C4變成金色了', goldBadge: '★ 金色C4',
     title: '粉身碎骨', back: '返回', undo: '退回1個', boom: '起爆', ruby: 'KOPPA MIJIN', logo: '粉身<span>碎骨</span>', sub: '貼上C4，引爆。',
     play: '去爆破', rank: '排行榜', how: '玩法', sndOn: '聲音：開', sndOff: '聲音：關', pick: '要炸掉哪個？', close: '關閉',
     how1: '用左下的搖桿移動，在畫面上滑動環顧四周。▲▼上下飛', how2: '點一下看得到的地方，C4就會貼在那裡。可以放任意個', how3: '按「起爆」一起炸。有剩下的話，可以再貼再炸', how4: '炸飛90%的方塊就是粉身碎骨。C4越少、越快，分數越高',
@@ -282,6 +310,7 @@ const TX = {
     shareT: '用C4 {c}個・{t}秒把「{s}」炸得粉身碎骨！ {p}分', tags: '#木っ端みじん',
   },
   ko: {
+    vidT: '폭발 영상', vidBtn: '🎬 폭발 영상', vidRec: '● 녹화 중', vidSee: '🎬 폭발 영상 보기', vidMaking: '영상을 만들고 있어요…', vidShare: '영상과 함께 X에 올리기', vidSave: '영상 저장', vidSaved: '저장했어요', vidPc: '영상을 저장했어요. 열린 게시 화면에 영상을 첨부해 줘', vidWebm: '이 영상 형식(webm)은 X에 올라가지 않을 수 있어요', shareV: 'C4로 「{s}」을 날려 버렸다!', gold: '모든 스테이지 제패! C4가 금색이 됐다', goldBadge: '★ 금색 C4',
     title: '산산조각', back: '뒤로', undo: '1개 취소', boom: '기폭', ruby: 'KOPPA MIJIN', logo: '산산<span>조각</span>', sub: 'C4를 붙이고, 기폭.',
     play: '폭파하러 가기', rank: '랭킹', how: '하는 법', sndOn: '소리: 켜짐', sndOff: '소리: 꺼짐', pick: '무엇을 날려 버릴까?', close: '닫기',
     how1: '왼쪽 아래 스틱으로 이동, 화면을 문지르면 둘러본다. ▲▼로 위아래로 난다', how2: '보이는 곳을 탭하면 거기에 C4가 붙는다. 몇 개든 놓을 수 있다', how3: '「기폭」으로 한꺼번에 쾅. 남으면 또 붙여서 기폭할 수 있다', how4: '블록의 90%를 날리면 산산조각. C4가 적고 빠를수록 높은 점수',
@@ -626,13 +655,35 @@ function stepFx(dt) {
 const C4S = []; // { g, k }
 const c4Geo = { body: new THREE.BoxGeometry(1, .5, .7), tape: new THREE.BoxGeometry(1.04, .52, .12), led: new THREE.SphereGeometry(.09, 10, 8), box: new THREE.BoxGeometry(.36, .16, .3) };
 const c4Mat = { body: new THREE.MeshStandardMaterial({ color: 0xe8e2c8, roughness: .8 }), tape: new THREE.MeshStandardMaterial({ color: 0x2b2b30, roughness: .7 }), box: new THREE.MeshStandardMaterial({ color: 0x23262c, roughness: .4 }), led: new THREE.MeshBasicMaterial({ color: 0xff2020 }) };
+const goldMat = {
+  body: new THREE.MeshStandardMaterial({ color: 0xffcc33, metalness: .75, roughness: .2, emissive: 0xc98a00, emissiveIntensity: .7 }),
+  tape: new THREE.MeshStandardMaterial({ color: 0xa86a00, metalness: .8, roughness: .3, emissive: 0x5a3500, emissiveIntensity: .6 }),
+  box: new THREE.MeshStandardMaterial({ color: 0xfff0a8, metalness: .7, roughness: .2, emissive: 0xd9a400, emissiveIntensity: .7 }),
+  led: new THREE.MeshBasicMaterial({ color: 0xfff6c0 }),
+};
+const starTex = canvasTex(128, 128, (g, w, h) => {
+  const r = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2); r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(.18, 'rgba(255,240,180,.8)'); r.addColorStop(1, 'rgba(255,200,60,0)'); g.fillStyle = r; g.fillRect(0, 0, w, h);
+  g.fillStyle = 'rgba(255,255,240,.95)'; g.beginPath();
+  for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, L = i % 2 ? 9 : 62; g.lineTo(w / 2 + Math.cos(a) * L, h / 2 + Math.sin(a) * L); } g.closePath(); g.fill();
+});
+const isGold = () => { const b = best(); for (let i = 0; i < STAGES.length; i++) if (!b[i]) return false; return true; };
+let GOLD = false;
 function makeC4(size) {
-  const g = new THREE.Group();
-  const body = new THREE.Mesh(c4Geo.body, c4Mat.body); body.position.y = .25; body.castShadow = true; g.add(body);
-  for (const z of [-.2, .2]) { const t = new THREE.Mesh(c4Geo.tape, c4Mat.tape); t.position.set(0, .25, z); g.add(t); }
-  const bx = new THREE.Mesh(c4Geo.box, c4Mat.box); bx.position.set(.15, .58, 0); g.add(bx);
-  const led = new THREE.Mesh(c4Geo.led, c4Mat.led.clone()); led.position.set(-.05, .66, 0); g.add(led); g.userData.led = led;
+  const g = new THREE.Group(), M = GOLD ? goldMat : c4Mat;
+  const body = new THREE.Mesh(c4Geo.body, M.body); body.position.y = .25; body.castShadow = true; g.add(body);
+  for (const z of [-.2, .2]) { const t = new THREE.Mesh(c4Geo.tape, M.tape); t.position.set(0, .25, z); g.add(t); }
+  const bx = new THREE.Mesh(c4Geo.box, M.box); bx.position.set(.15, .58, 0); g.add(bx);
+  const led = new THREE.Mesh(c4Geo.led, M.led.clone()); led.position.set(-.05, .66, 0); g.add(led); g.userData.led = led;
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xff3030, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })); halo.scale.setScalar(.7); halo.position.copy(led.position); g.add(halo); g.userData.halo = halo;
+  if (GOLD) {
+    halo.material.color.set(0xffe070); halo.scale.setScalar(1.1);
+    const aura = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xffc030, transparent: true, opacity: .55, depthWrite: false, blending: THREE.AdditiveBlending })); aura.scale.setScalar(3.2); aura.position.y = .35; g.add(aura); g.userData.aura = aura;
+    g.userData.spark = [];
+    for (let i = 0; i < 9; i++) {
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: starTex, color: 0xfff0b0, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+      sp.position.set((Math.random() - .5) * 1.6, .1 + Math.random() * 1.0, (Math.random() - .5) * 1.3); sp.userData.ph = Math.random() * 6.28; sp.userData.sp = 5 + Math.random() * 5; g.add(sp); g.userData.spark.push(sp);
+    }
+  }
   g.scale.setScalar(size); return g;
 }
 const rc = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -654,19 +705,23 @@ function clearC4() { while (C4S.length) scene.remove(C4S.pop().g); }
 /* ===================== 音 ===================== */
 let ac = null, SOUND = lsGet('kp_snd') !== false;
 function audioOn() { if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { ac = null; } } if (ac && ac.state === 'suspended') ac.resume(); }
+function outNode() {
+  if (!ac.master) { ac.master = ac.createGain(); ac.master.connect(ac.destination); try { REC.dest = ac.createMediaStreamDestination(); ac.master.connect(REC.dest); } catch (_) { REC.dest = null; } }
+  return ac.master;
+}
 function noise(dur, f0, f1, q, vol, type = 'lowpass', delay = 0) {
   if (!ac || !SOUND) return; const n = Math.floor(ac.sampleRate * dur), b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0);
   for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
   const s = ac.createBufferSource(); s.buffer = b; const f = ac.createBiquadFilter(); f.type = type; f.Q.value = q;
   const t = ac.currentTime + delay; f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
   const g = ac.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
-  s.connect(f).connect(g).connect(ac.destination); s.start(t);
+  s.connect(f).connect(g).connect(outNode()); s.start(t);
 }
 function tone(f0, f1, dur, vol, type = 'sine', delay = 0) {
   if (!ac || !SOUND) return; const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + delay;
   o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
   g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(.001, t + dur);
-  o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + .02);
+  o.connect(g).connect(outNode()); o.start(t); o.stop(t + dur + .02);
 }
 const SND = {
   boom(v = 1) { noise(1.6, 900, 40, .7, .9 * v); noise(.35, 4000, 300, .5, .6 * v, 'bandpass'); tone(90, 28, 1.0, .9 * v, 'sine'); tone(160, 40, .4, .4 * v, 'triangle'); },
@@ -711,7 +766,7 @@ function stickSet(e) {
   stickDraw();
 }
 stickEl.addEventListener('pointerdown', e => {
-  e.preventDefault(); if (mode !== 'play' || STK.id >= 0) return; audioOn();
+  e.preventDefault(); if (mode !== 'play' || AUTO.on || STK.id >= 0) return; audioOn();
   STK.id = e.pointerId; try { stickEl.setPointerCapture(e.pointerId); } catch (_) { } stickSet(e);
 });
 stickEl.addEventListener('pointermove', e => { if (e.pointerId === STK.id) stickSet(e); });
@@ -720,7 +775,7 @@ for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) stickEl.a
 // 画面：なぞると見回す（少し動かしてから回りはじめる）、タップでC4
 const LOOK_START = 8;
 function onDown(e) {
-  if (mode !== 'play') return;
+  if (mode !== 'play' || AUTO.on || VIDOPEN) return;
   audioOn();
   TAPS.set(e.pointerId, { x: e.clientX, y: e.clientY, t: performance.now(), mv: 0 });
   try { canvas.setPointerCapture(e.pointerId); } catch (_) { }
@@ -760,7 +815,7 @@ addEventListener('blur', inputReset);
 document.addEventListener('visibilitychange', () => { if (document.hidden) inputReset(); });
 for (const [id, d] of [['#upBtn', 1], ['#dnBtn', -1]]) {
   const b = $(id);
-  b.addEventListener('pointerdown', e => { e.preventDefault(); if (mode !== 'play') return; CAM.up = d; b.classList.add('on'); try { b.setPointerCapture(e.pointerId); } catch (_) { } });
+  b.addEventListener('pointerdown', e => { e.preventDefault(); if (mode !== 'play' || AUTO.on) return; CAM.up = d; b.classList.add('on'); try { b.setPointerCapture(e.pointerId); } catch (_) { } });
   const off = () => { if (CAM.up === d) CAM.up = 0; b.classList.remove('on'); };
   for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(ev, off);
   b.addEventListener('contextmenu', e => e.preventDefault());
@@ -786,7 +841,7 @@ let mode = 'title';
 const TQ = []; let TQid = 0, gameT = 0;
 function later(fn, ms) { const id = ++TQid; TQ.push({ id, t: gameT + ms / 1000, fn }); return id; }
 function runLater() { for (let i = 0; i < TQ.length; i++) if (TQ[i].t <= gameT) { const q = TQ.splice(i, 1)[0]; i--; q.fn(); } }
-const PANELS = ['#title', '#stageP', '#howP', '#endP', '#rankP'];
+const PANELS = ['#title', '#stageP', '#howP', '#endP', '#rankP', '#vidP'];
 function showPanel(id) { PANELS.forEach(p => $(p).hidden = p !== id); }
 let hintT = 0;
 function hint(t, err = false) { const h = $('#hint'); if (!t) { h.hidden = true; return; } h.textContent = t; h.hidden = false; h.classList.toggle('err', err); hintT = err ? 2.2 : 0; }
@@ -806,30 +861,31 @@ function ui() {
   $('#boomN').textContent = C4S.length; $('#boom').classList.toggle('dis', !C4S.length); $('#undo').disabled = !C4S.length;
 }
 function toTitle() {
-  inputReset(); mode = 'title'; clearC4(); loadStage(4); camHome(); showPanel('#title'); hud(false); hint(''); bigMsg(''); showTut('');
+  inputReset(); autoStop(); recForget(); VIDOPEN = false; mode = 'title'; clearC4(); loadStage(4); camHome(); showPanel('#title'); hud(false); hint(''); bigMsg(''); showTut('');
 }
 function hud(on) { $('#hud').hidden = !on; $('#ctl').hidden = !on; $('#stick').hidden = !on; }
 function showTut(t) { const e = $('#tut'); e.textContent = t || ''; e.hidden = !t; }
 function tutStep(n) { if (!BAT.tut || n <= BAT.tut) return; BAT.tut = n; showTut(tr('tut' + n)); hint(''); }
 function startStage(i) {
-  inputReset(); audioOn(); mode = 'play'; BAT.st = i; BAT.t = 0; BAT.c4 = 0; BAT.running = true; BAT.done = false; BAT.checkT = 0; BAT.look = 0;
+  inputReset(); autoStop(); recForget(); VIDOPEN = false; GOLD = isGold(); audioOn(); mode = 'play'; BAT.st = i; BAT.t = 0; BAT.c4 = 0; BAT.running = true; BAT.done = false; BAT.checkT = 0; BAT.look = 0;
   clearC4(); TQ.length = 0; FX.splice(0).forEach(f => scene.remove(f.g)); loadStage(i); camHome(); showPanel(null); hud(true); bigMsg(''); ui();
   BAT.tut = i === 0 && !lsGet('kp_tut') ? 1 : 0; showTut(BAT.tut ? tr('tut1') : ''); hint(BAT.tut ? '' : tr('hintTap'));
   history.replaceState(null, '', '?st=' + (i + 1));
 }
 function detonate() {
-  if (mode !== 'play' || BAT.done) return;
+  if (mode !== 'play' || BAT.done || AUTO.on || VIDOPEN) return;
   if (!C4S.length) { hint(tr('noC4'), true); SND.error(); return; }
   const L = C4S.splice(0), R = STAGES[BAT.st].R; BAT.c4 += L.length;
   if (BAT.tut) { lsSet('kp_tut', 1); BAT.tut = 0; showTut(''); }
   hint(''); SND.arm(); bigMsg(tr('boomMsg'), '', '', .9);
   L.forEach((c, j) => later(() => { scene.remove(c.g); explode(c.g.position.clone(), R); }, 260 + j * 55));
   SLOW.t = .9; BAT.checkT = 2.6 + L.length * .055; ui();
+  const dur = Math.min(9, 6.6 + L.length * .055); autoStart(dur); recStart(dur);
 }
 function stepPlay(dt) {
-  if (BAT.running) BAT.t += dt;
+  if (BAT.running && !VIDOPEN && !AUTO.on) BAT.t += dt; // 爆発を見ている間は時間を止める
   if (!BAT.done && pct() >= .9) { // 木っ端みじん
-    BAT.done = true; BAT.running = false; BAT.checkT = 0;
+    BAT.done = true; BAT.running = false; BAT.checkT = 0; if (REC.cur) REC.cur.clear = true;
     later(() => { if (mode === 'play') success(); }, 1800);
     later(() => { SND.win(); bigMsg(tr('clear'), '', 'good', 1.6); }, 500);
   }
@@ -839,18 +895,21 @@ const score = (c, t) => Math.max(1, Math.round(100000 / (c * 2 + t + 5)));
 let last = null;
 function success() {
   inputReset(); mode = 'end'; hud(false); hint(''); showTut('');
+  BAT.t = Math.max(1, BAT.t);
   const i = BAT.st, t = Math.round(BAT.t * 10) / 10, c = BAT.c4, p = score(c, t);
   const b = best(), old = b[i]; const nb = !old || p > old.p; if (nb) { b[i] = { p, c, t }; lsSet('kp_best', b); }
+  const newGold = !GOLD && isGold(); if (newGold) GOLD = true; $('#goldMsg').hidden = !newGold;
   last = { st: i, p, c, t, ms: Math.round(BAT.t * 1000) };
   $('#endSub').textContent = tr('endSub', { s: stName(i) });
   $('#endStats').innerHTML = `<div><span>${esc(tr('pts'))}</span><b>${p}</b></div><div><span>${esc(tr('c4'))}</span><b>${c}</b></div><div><span>${esc(tr('time'))}</span><b>${t.toFixed(1)}</b></div>`;
   $('#endBest').textContent = nb ? tr('newBest') : tr('best', { v: tr('ptsV', { v: old.p }) });
   $('#nameIn').value = lsGet('kp_name') || ''; $('#sendMsg').textContent = ''; $('#sendMsg').className = 'note'; $('#send').disabled = false;
   $('#endNext').hidden = i >= STAGES.length - 1;
-  showPanel('#endP');
+  showPanel('#endP'); vidUi();
 }
 function stageList() {
   const b = best();
+  $('#goldBadge').hidden = !isGold();
   $('#stgList').innerHTML = STAGES.map((S, i) => `<button data-s="${i}" class="${b[i] ? 'done' : ''}"><span class="no">STAGE ${i + 1}</span><b>${esc(stName(i))}</b><small>${b[i] ? esc(tr('best', { v: tr('ptsV', { v: b[i].p }) })) : esc(tr('noBest'))}</small></button>`).join('');
   $('#stgList').querySelectorAll('button').forEach(e => e.onclick = guard(() => startStage(+e.dataset.s)));
   showPanel('#stageP');
@@ -927,6 +986,130 @@ $('#send').onclick = async () => {
 };
 
 /* ===================== まわす ===================== */
+/* ===================== 起爆したら：カメラが引いて回る ===================== */
+const AUTO = { on: false, t: 0, dur: 0, sp: V3(), syaw: 0, spitch: 0, a0: 0, D: 0, H: 0, ty: 0 };
+const angLerp = (a, b, u) => { let d = ((b - a + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI; return a + d * u; };
+function autoStart(dur) {
+  inputReset(); const c = BLK.center;
+  Object.assign(AUTO, { on: true, t: 0, dur, syaw: CAM.yaw, spitch: CAM.pitch });
+  AUTO.sp.copy(CAM.p);
+  AUTO.a0 = Math.atan2(CAM.p.x - c.x, CAM.p.z - c.z);
+  AUTO.D = Math.max(7.5, BLK.size * 1.3); AUTO.H = Math.max(3, BLK.size * .55 + 1.5); AUTO.ty = Math.max(1, c.y * .7);
+}
+function autoStop() { AUTO.on = false; }
+function autoCam(dt) {
+  AUTO.t += dt; const c = BLK.center, u = AUTO.t / AUTO.dur;
+  const a = AUTO.a0 + AUTO.t * .16, D = AUTO.D * (1 + .08 * Math.min(1, u)), H = AUTO.H;
+  const op = V3(c.x + Math.sin(a) * D, H, c.z + Math.cos(a) * D), d = V3(c.x - op.x, AUTO.ty - op.y, c.z - op.z);
+  const oyaw = Math.atan2(-d.x, -d.z), opitch = Math.atan2(d.y, Math.hypot(d.x, d.z));
+  const sm = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
+  let e = sm(AUTO.t / .7);
+  const back = mode === 'play' ? sm((AUTO.t - (AUTO.dur - .7)) / .7) : 0; // まだ残っていたら元の場所へもどる
+  e *= 1 - back;
+  camera.position.lerpVectors(AUTO.sp, op, e);
+  camera.rotation.set(lerp(AUTO.spitch, opitch, e), angLerp(AUTO.syaw, oyaw, e), 0, 'YXZ');
+  if (mode === 'play' && AUTO.t >= AUTO.dur) { AUTO.on = false; CAM.p.copy(AUTO.sp); CAM.yaw = AUTO.syaw; CAM.pitch = AUTO.spitch; camApply(); }
+}
+
+/* ===================== 爆発の動画を録る ===================== */
+const REC = { sup: false, dest: null, cur: null, last: null, cv: null, cx: null, gen: 0 };
+try { REC.sup = !!(window.MediaRecorder && HTMLCanvasElement.prototype.captureStream); } catch (_) { }
+function recType() {
+  for (const t of ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'])
+    try { if (MediaRecorder.isTypeSupported(t)) return t; } catch (_) { }
+  return '';
+}
+function recStart(dur) {
+  if (!REC.sup) return;
+  if (REC.cur) recStop();
+  try {
+    const sc = Math.min(1, 720 / canvas.width), w = Math.round(canvas.width * sc / 2) * 2, h = Math.round(canvas.height * sc / 2) * 2;
+    if (!REC.cv) { REC.cv = document.createElement('canvas'); REC.cx = REC.cv.getContext('2d'); }
+    REC.cv.width = w; REC.cv.height = h; recDraw();
+    const st = REC.cv.captureStream(30);
+    if (REC.dest) REC.dest.stream.getAudioTracks().forEach(t => st.addTrack(t));
+    const type = recType(), mr = new MediaRecorder(st, type ? { mimeType: type, videoBitsPerSecond: 5e6 } : { videoBitsPerSecond: 5e6 });
+    const R = { mr, gen: REC.gen, chunks: [], until: tAll + dur, st: BAT.st, c4: BAT.c4, type: mr.mimeType || type || 'video/webm', clear: false };
+    mr.ondataavailable = e => { if (e.data && e.data.size) R.chunks.push(e.data); };
+    mr.onstop = () => {
+      st.getVideoTracks().forEach(t => t.stop());
+      if (!R.chunks.length || R.gen !== REC.gen) return;
+      const blob = new Blob(R.chunks, { type: R.type.split(';')[0] });
+      if (REC.last && REC.last.url) URL.revokeObjectURL(REC.last.url);
+      REC.last = { blob, url: URL.createObjectURL(blob), st: R.st, c4: R.c4, clear: R.clear, ext: /mp4/.test(R.type) ? 'mp4' : 'webm' };
+      vidUi();
+    };
+    mr.start(250); REC.cur = R; vidUi();
+  } catch (e) { REC.cur = null; }
+}
+function recForget() { recStop(); REC.gen++; if (REC.last && REC.last.url) URL.revokeObjectURL(REC.last.url); REC.last = null; vidUi(); }
+function recStop() { const R = REC.cur; REC.cur = null; if (R) { try { R.mr.stop(); } catch (_) { } } vidUi(); }
+function recDraw() {
+  const cv = REC.cv, g = REC.cx, w = cv.width, h = cv.height, u = w / 360;
+  g.drawImage(canvas, 0, 0, w, h);
+  const disp = '"Dela Gothic One","Hiragino Sans","Noto Sans JP",sans-serif';
+  // 上：ステージ名とC4
+  g.textBaseline = 'middle'; g.lineJoin = 'round';
+  g.font = `${Math.round(15 * u)}px ${disp}`; g.textAlign = 'left';
+  const top = `${stName(BAT.st)}  ×  C4 ${REC.cur ? REC.cur.c4 : BAT.c4}`;
+  g.lineWidth = 4 * u; g.strokeStyle = 'rgba(0,0,0,.75)'; g.strokeText(top, 12 * u, 22 * u); g.fillStyle = '#ffd21f'; g.fillText(top, 12 * u, 22 * u);
+  // まん中：ドカン！や 木っ端みじん！
+  const mb = $('#msg'); if (!mb.hidden && $('#msgBig').textContent) {
+    const t = $('#msgBig').textContent; let fs = 54 * u; g.font = `${Math.round(fs)}px ${disp}`;
+    while (g.measureText(t).width > w * .9 && fs > 20) { fs -= 2; g.font = `${Math.round(fs)}px ${disp}`; }
+    g.textAlign = 'center'; g.lineWidth = 9 * u; g.strokeStyle = '#120a06'; g.strokeText(t, w / 2, h * .3);
+    g.fillStyle = $('#msgBig').classList.contains('good') ? '#ffd21f' : '#fff'; g.fillText(t, w / 2, h * .3);
+  }
+  // 下：ゲーム名とURL
+  const gr = g.createLinearGradient(0, h - 70 * u, 0, h); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,.6)'); g.fillStyle = gr; g.fillRect(0, h - 70 * u, w, 70 * u);
+  g.textAlign = 'left'; g.font = `${Math.round(22 * u)}px ${disp}`; g.lineWidth = 5 * u; g.strokeStyle = '#000';
+  g.strokeText(tr('title'), 12 * u, h - 38 * u); g.fillStyle = '#ffd21f'; g.fillText(tr('title'), 12 * u, h - 38 * u);
+  g.font = `900 ${Math.round(11 * u)}px sans-serif`; g.fillStyle = '#fff'; g.fillText('nasubi-no-oniwa.github.io/kopamijin', 12 * u, h - 16 * u);
+}
+function recFrame() { const R = REC.cur; if (!R) return; recDraw(); if (tAll >= R.until) recStop(); }
+// 動画のボタン
+let VIDOPEN = false;
+function vidUi() {
+  const has = !!REC.last, making = !!REC.cur;
+  $('#vidBtn').hidden = !(REC.sup && (has || making)); $('#vidBtn').disabled = making && !has;
+  $('#vidBtn').textContent = making ? tr('vidRec') : tr('vidBtn');
+  $('#endVid').hidden = !REC.sup; $('#endVid').disabled = making || !has; $('#endVid').textContent = making ? tr('vidMaking') : tr('vidSee');
+}
+function vidOpen() {
+  if (!REC.last) return; VIDOPEN = true; inputReset();
+  const v = $('#vid'); v.src = REC.last.url; v.muted = true; try { v.play(); } catch (_) { }
+  $('#vidNote').textContent = REC.last.ext === 'webm' ? tr('vidWebm') : ''; $('#vidNote').className = 'note';
+  showPanel('#vidP');
+}
+function vidClose() { VIDOPEN = false; const v = $('#vid'); try { v.pause(); } catch (_) { } showPanel(mode === 'end' ? '#endP' : null); }
+function vidName() { return 'kopamijin-' + (REC.last.st + 1) + '.' + REC.last.ext; }
+function vidSave() {
+  const a = document.createElement('a'); a.href = REC.last.url; a.download = vidName(); document.body.appendChild(a); a.click(); a.remove();
+}
+function shareText() {
+  const V = REC.last, L = last && V && V.clear && last.st === V.st ? last : null;
+  const head = L ? tr('shareT', { s: stName(L.st), c: L.c, t: L.t.toFixed(1), p: L.p }) : tr('shareV', { s: stName(V ? V.st : BAT.st) });
+  return head + '\n' + tr('tags') + '\n' + GAME_URL + '?st=' + ((V ? V.st : BAT.st) + 1);
+}
+async function vidShare() {
+  if (!REC.last) return; const text = shareText();
+  const touch = matchMedia('(pointer:coarse)').matches;
+  if (touch && navigator.share) {
+    try {
+      const f = new File([REC.last.blob], vidName(), { type: REC.last.blob.type });
+      if (!navigator.canShare || navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], text }); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  // パソコン：保存して、投稿画面を開く（動画は自分で添付）
+  vidSave(); $('#vidNote').textContent = tr('vidPc'); $('#vidNote').className = 'note ok';
+  open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank', 'noopener');
+}
+$('#vidBtn').onclick = () => vidOpen();
+$('#endVid').onclick = () => vidOpen();
+$('#vidSave').onclick = () => { vidSave(); $('#vidNote').textContent = tr('vidSaved'); $('#vidNote').className = 'note ok'; };
+$('#vidShare').onclick = () => vidShare();
+$('#vidClose').onclick = () => vidClose();
+
 let lastT = performance.now(), tAll = 0, acc = 0, MANUAL = false;
 const PH = 1 / 60;
 function frame(now) { const dt = Math.min(.1, (now - lastT) / 1000); lastT = now; if (!MANUAL) stepAll(dt); requestAnimationFrame(frame); }
@@ -940,18 +1123,27 @@ function stepAll(dt, draw = true) {
   stepFx(sd);
   if (hintT > 0) { hintT -= dt; if (hintT <= 0 && mode === 'play') hint(tr('hintTap')); }
   if (msgT > 0) { msgT -= dt; if (msgT <= 0) $('#msg').hidden = true; }
-  if (mode === 'play') { stepPlay(dt); stepCam(dt); ui(); }
-  if (mode === 'title' || mode === 'end') {
+  if (mode === 'play') { stepPlay(dt); if (!AUTO.on && !VIDOPEN) stepCam(dt); ui(); }
+  if (AUTO.on && (mode === 'play' || mode === 'end')) autoCam(dt);
+  else if (mode === 'title' || mode === 'end') {
     const a = tAll * .12, D = Math.max(6, BLK.size * 1.4), c = BLK.center;
     camera.position.set(c.x + Math.sin(a) * D, Math.max(2, BLK.size * .55), c.z + Math.cos(a) * D); camera.lookAt(c.x, BLK.size * .3, c.z);
   } else camApply();
   // C4 の赤い光が点滅
   const on = Math.sin(tAll * 10) > 0; for (const c of C4S) { c.g.userData.halo.material.opacity = on ? 1 : .25; }
+  if (GOLD && C4S.length) {
+    const pu = .5 + .5 * Math.sin(tAll * 5); goldMat.body.emissiveIntensity = .55 + .5 * pu; goldMat.box.emissiveIntensity = .6 + .5 * pu;
+    for (const c of C4S) {
+      const U = c.g.userData; if (U.aura) { U.aura.material.opacity = .45 + .45 * pu; U.aura.scale.setScalar(2.8 + .9 * pu); }
+      if (U.spark) for (const sp of U.spark) { const v = Math.max(0, Math.sin(tAll * sp.userData.sp + sp.userData.ph)); sp.scale.setScalar(.2 + 1.05 * v * v); sp.material.opacity = v; sp.material.rotation = tAll * 2 + sp.userData.ph; }
+    }
+  }
   // 白く光る・ゆれる
   if (flashV > .001) { $('#flash').style.opacity = flashV.toFixed(3); flashV *= Math.exp(-dt * 6); } else if (flashV) { flashV = 0; $('#flash').style.opacity = 0; }
   let sx = 0, sy = 0; if (SHAKE.a > .002) { SHAKE.a *= Math.exp(-dt * 6); sx = (Math.random() - .5) * SHAKE.a * .5; sy = (Math.random() - .5) * SHAKE.a * .5; camera.position.x += sx; camera.position.y += sy; }
   camera.updateMatrixWorld();
   if (draw) renderer.render(scene, camera);
+  if (draw) recFrame();
   if (sx || sy) { camera.position.x -= sx; camera.position.y -= sy; }
 }
 
@@ -962,7 +1154,7 @@ $('#loading').remove();
 requestAnimationFrame(frame);
 // テスト用
 window.__kp = {
-  get mode() { return mode; }, BLK, BAT, C4S, STAGES, CAM, startStage, placeAt, detonate, undoC4, pct, toTitle, stageList, score, SND, explode, camHome, camera,
+  get mode() { return mode; }, get GOLD() { return GOLD; }, REC, AUTO, vidOpen, BLK, BAT, C4S, STAGES, CAM, startStage, placeAt, detonate, undoC4, pct, toTitle, stageList, score, SND, explode, camHome, camera,
   manual(on) { MANUAL = on; }, tick(dt, draw = true) { stepAll(dt, draw); }, run(n, dt = 1 / 30) { for (let i = 0; i < n; i++) stepAll(dt, i === n - 1); },
   toScreen(v) { const p = v.clone().project(camera); return { x: (p.x + 1) / 2 * VW, y: (1 - p.y) / 2 * VH }; },
 };
