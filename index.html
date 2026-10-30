@@ -429,24 +429,25 @@ function Model(s) {
   };
   return M;
 }
+const POW = { r: 1, v: 1, chain: 1.1 }; // 火力（r：届く広さ、v：飛ぶ勢い）
 const TANK = 0xff5a1f; // 誘爆する物
 const STAGES = [
   { // 1 犬小屋
-    s: .12, R: 1.3, mk(M) {
+    s: .12, R: 1.05, mk(M) {
       M.box(-5, 5, 0, 0, -6, 6, 0xb8773c); M.shell(-5, 5, 0, 7, -6, 6, 0xd4924f); M.clear(-4, 4, 1, 6, -5, 5);
       M.clear(-2, 2, 1, 5, 6, 6); M.paint(-5, 5, 7, 7, -6, 6, 0xc9833f);
       for (let h = 0; h <= 6; h++) for (let z = -7; z <= 7; z++) { M.set(-6 + h, 8 + h, z, 0xe5463a); M.set(6 - h, 8 + h, z, 0xe5463a); }
       M.box(-1, 1, 9, 9, 7, 7, 0xffd21f);
     } },
   { // 2 自転車
-    s: .08, R: .9, mk(M) {
+    s: .08, R: 0.72, mk(M) {
       for (const cx of [-11, 11]) { for (let r = 7; r <= 8; r++) M.ring(cx, 8, 0, r, 0x222226); for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI; M.line([cx + Math.round(Math.cos(a) * 6), 8 + Math.round(Math.sin(a) * 6), 0], [cx - Math.round(Math.cos(a) * 6), 8 - Math.round(Math.sin(a) * 6), 0], 0xc4ccd6); } }
       const F = 0x1fa3ff; M.line([-11, 8, 0], [-3, 18, 0], F); M.line([-11, 8, 0], [0, 7, 0], F); M.line([0, 7, 0], [-3, 18, 0], F); M.line([-3, 18, 0], [8, 18, 0], F); M.line([0, 7, 0], [8, 18, 0], F); M.line([11, 8, 0], [8, 20, 0], F);
       M.box(-6, -1, 20, 20, -1, 1, 0x222226); M.line([-3, 18, 0], [-3, 20, 0], 0x222226); M.box(7, 9, 21, 21, -4, 4, 0xc4ccd6); M.box(-1, 1, 6, 8, -2, 2, 0x555b66);
       M.box(10, 12, 15, 16, -1, 1, 0xffd21f);
     } },
   { // 3 車
-    s: .2, R: 1.55, mk(M) {
+    s: .2, R: 1.4, mk(M) {
       const C = 0xff3b6b; M.shell(-11, 11, 2, 6, -5, 5, C); M.shell(-5, 5, 7, 10, -5, 5, 0x9fe3ff); M.paint(-5, 5, 10, 10, -5, 5, C); M.paint(-5, -5, 7, 10, -5, 5, C);
       M.box(-11, 11, 2, 2, -5, 5, 0x2a2a30);
       for (const x of [-7, 7]) for (const z of [[-6, -5], [5, 6]]) M.wheel(x, 3, z[0], z[1], 3, 0x1c1c20);
@@ -454,7 +455,7 @@ const STAGES = [
       M.box(-10, -8, 3, 4, -2, 2, TANK, 1);
     } },
   { // 4 トラック
-    s: .28, R: 2.2, mk(M) {
+    s: .28, R: 1.4, mk(M) {
       M.box(-13, 13, 2, 2, -4, 4, 0x2a2a30);
       M.shell(7, 13, 3, 10, -4, 4, 0x3aa0ff); M.box(13, 13, 6, 9, -3, 3, 0x9fe3ff); M.box(8, 12, 6, 9, -4, -4, 0x9fe3ff); M.box(8, 12, 6, 9, 4, 4, 0x9fe3ff);
       M.shell(-13, 6, 3, 12, -4, 4, 0xf4f4f0); M.paint(-13, 6, 6, 7, -4, 4, 0xff3b3b);
@@ -462,7 +463,7 @@ const STAGES = [
       M.box(1, 4, 1, 2, 4, 5, TANK, 1); M.box(1, 4, 1, 2, -5, -4, TANK, 1);
     } },
   { // 5 家
-    s: .3, R: 2.3, mk(M) {
+    s: .3, R: 1.85, mk(M) {
       M.shell(-10, 10, 0, 9, -8, 8, 0xffe3b0); M.clear(-9, 9, 1, 9, -7, 7); M.box(-10, 10, 0, 0, -8, 8, 0xc7b28c);
       for (const x of [-7, 5]) { M.box(x, x + 2, 4, 6, 8, 8, 0x8fd8ff); M.box(x, x + 2, 4, 6, -8, -8, 0x8fd8ff); }
       M.box(-1, 1, 1, 6, 8, 8, 0x8a5a2b); M.box(-10, -10, 4, 6, -2, 1, 0x8fd8ff); M.box(10, 10, 4, 6, -2, 1, 0x8fd8ff);
@@ -474,14 +475,14 @@ const STAGES = [
       M.box(12, 13, 0, 3, 3, 4, TANK, 1);
     } },
   { // 6 バス
-    s: .3, R: 2.3, mk(M) {
+    s: .3, R: 1.65, mk(M) {
       const Y = 0xffc21f; M.shell(-18, 18, 2, 10, -4, 4, Y); M.paint(-18, 18, 6, 8, -4, 4, 0x9fe3ff); M.paint(-18, 18, 2, 2, -4, 4, 0x2a2a30); M.paint(-18, 18, 10, 10, -4, 4, 0xf4f4f0);
       M.box(18, 18, 3, 5, -3, -2, 0xfff3a0); M.box(18, 18, 3, 5, 2, 3, 0xfff3a0); M.paint(18, 18, 6, 9, -3, 3, 0x9fe3ff);
       for (const x of [-12, 12]) for (const z of [[-5, -4], [4, 5]]) M.wheel(x, 2, z[0], z[1], 2, 0x1c1c20);
       M.box(-3, 1, 1, 2, -5, -5, TANK, 1);
     } },
   { // 7 2階建ての家
-    s: .38, R: 2.7, mk(M) {
+    s: .38, R: 2.15, mk(M) {
       const W = 0xbfe8a0; M.shell(-10, 10, 0, 15, -9, 9, W); M.clear(-9, 9, 1, 15, -8, 8); M.box(-9, 9, 8, 8, -8, 8, 0xd8c7a0);
       for (const yy of [3, 11]) for (const x of [-7, -2, 3, 7]) { M.box(x, x + 1, yy, yy + 2, 9, 9, 0x8fd8ff); M.box(x, x + 1, yy, yy + 2, -9, -9, 0x8fd8ff); }
       M.box(-1, 1, 1, 5, 9, 9, 0x8a5a2b);
@@ -491,7 +492,7 @@ const STAGES = [
       M.box(11, 12, 0, 3, -4, -3, TANK, 1); M.box(-12, -11, 0, 3, 3, 4, TANK, 1);
     } },
   { // 8 船
-    s: .4, R: 2.8, mk(M) {
+    s: .4, R: 2.6, mk(M) {
       for (let x = -18; x <= 18; x++) { const t = x > 10 ? (x - 10) / 9 : 0; for (let y = 2; y <= 8; y++) { const w = Math.round((4 + (y - 2) * .3) * (1 - t * t)); if (w < 0) continue; for (let z = -w; z <= w; z++) if (Math.abs(z) >= w - 0 || y === 2 || x === -18) M.set(x, y, z, y < 5 ? 0xd43b3b : 0x2a4d8f); } }
       for (let x = -18; x <= 15; x++) { const t = x > 10 ? (x - 10) / 9 : 0, w = Math.round(5.8 * (1 - t * t)); for (let z = -w; z <= w; z++) M.set(x, 9, z, 0xc79a5b); }
       M.shell(-12, -2, 10, 14, -4, 4, 0xf4f4f0); M.paint(-12, -2, 12, 12, -4, 4, 0x8fd8ff); M.box(-9, -7, 15, 19, -1, 1, 0xff8a1f);
@@ -499,7 +500,7 @@ const STAGES = [
       for (const x of [2, 5, 8]) M.box(x, x + 1, 10, 11, -2, -1, TANK, 1);
     } },
   { // 9 飛行機
-    s: .45, R: 3.1, mk(M) {
+    s: .45, R: 2.7, mk(M) {
       const cy = 8; M.tube(-22, 22, cy, 0, x => x > 17 ? Math.round(4 * (1 - ((x - 17) / 6) ** 2)) : x < -15 ? Math.round(4 - (-15 - x) * .4) : 4, 0xf4f7fb);
       M.paint(-22, 22, cy - 1, cy, -5, -3, 0x2f6fe0); M.paint(-22, 22, cy - 1, cy, 3, 5, 0x2f6fe0); M.paint(18, 21, cy + 1, cy + 2, -3, 3, 0x223);
       for (let z = 4; z <= 21; z++) { const x0 = -3 - Math.round((z - 4) * .35), x1 = 4 - Math.round((z - 4) * .25); for (let x = x0; x <= x1; x++) { M.set(x, cy - 2, z, 0xe8edf3); M.set(x, cy - 2, -z, 0xe8edf3); } }
@@ -510,7 +511,7 @@ const STAGES = [
       M.box(12, 12, 0, cy - 4, 0, 0, 0x30333a); M.box(-1, -1, 0, cy - 4, -3, -3, 0x30333a); M.box(-1, -1, 0, cy - 4, 3, 3, 0x30333a);
     } },
   { // 10 ビル
-    s: .55, R: 3.5, mk(M) {
+    s: .55, R: 2.2, mk(M) {
       M.shell(-7, 7, 0, 35, -7, 7, 0x7c8aa5); M.clear(-6, 6, 1, 34, -6, 6);
       for (let y = 2; y <= 34; y += 1) if (y % 6 !== 0) for (let u = -6; u <= 6; u++) if (u % 2 === 0) { M.paint(u, u, y, y, -7, -7, 0x9fdcff); M.paint(u, u, y, y, 7, 7, 0x9fdcff); M.paint(-7, -7, y, y, u, u, 0x9fdcff); M.paint(7, 7, y, y, u, u, 0x9fdcff); }
       for (let y = 6; y < 35; y += 6) M.box(-6, 6, y, y, -6, 6, 0xb0b6c2);
@@ -555,6 +556,7 @@ function detach(k, vx, vy, vz) {
   if (BLK.ST[k] !== 1) BLK.live.push(k);
   BLK.ST[k] = 1; BLK.TT[k] = 0;
   BLK.V[k * 3] += vx; BLK.V[k * 3 + 1] += vy; BLK.V[k * 3 + 2] += vz;
+  { const i = k * 3, L = Math.hypot(BLK.V[i], BLK.V[i + 1], BLK.V[i + 2]), M = 22 * POW.v; if (L > M) { BLK.V[i] *= M / L; BLK.V[i + 1] *= M / L; BLK.V[i + 2] *= M / L; } } // 何度爆風を受けても飛びすぎない
   const w = 6 + Math.hypot(vx, vy, vz) * .8; BLK.W[k * 3] = (rnd() - .5) * w; BLK.W[k * 3 + 1] = (rnd() - .5) * w; BLK.W[k * 3 + 2] = (rnd() - .5) * w;
 }
 // 地面につながっていない所は崩れ落ちる
@@ -613,11 +615,11 @@ function explode(p, R) {
     const d = Math.sqrt(d2) || .01, f = 1 - d / (R * 1.3);
     if (f <= 0) continue;
     if (BLK.ST[k] === 0 && d > R) continue; // 固定されたブロックは R の内側だけ
-    const sp = 5 + 17 * f * f;
-    detach(k, dx / d * sp + (rnd() - .5) * 2, dy / d * sp * .6 + 3 + 7 * f, dz / d * sp + (rnd() - .5) * 2);
+    const sp = (4 + 11 * f * f) * POW.v;
+    detach(k, dx / d * sp + (rnd() - .5) * 1.6, (dy / d * sp * .5 + 2 + 4.5 * f) * POW.v, dz / d * sp + (rnd() - .5) * 1.6);
     if (BLK.K[k] === 1) { BLK.K[k] = 2; chain.push(k); }
   }
-  for (const k of chain) later(() => { if (mode !== 'play' && mode !== 'title') return; explode(V3(P[k * 3], P[k * 3 + 1], P[k * 3 + 2]), R * 1.6); }, 120 + rnd() * 120);
+  for (const k of chain) later(() => { if (mode !== 'play' && mode !== 'title') return; explode(V3(P[k * 3], P[k * 3 + 1], P[k * 3 + 2]), R * POW.chain); }, 120 + rnd() * 120);
   BLK.mesh.instanceMatrix.needsUpdate = true;
   later(collapse, 30);
   fireball(p, R);
@@ -883,7 +885,7 @@ function startStage(i) {
 function detonate() {
   if (mode !== 'play' || BAT.done || AUTO.on || VIDOPEN) return;
   if (!C4S.length) { hint(tr('noC4'), true); SND.error(); return; }
-  const L = C4S.splice(0), R = STAGES[BAT.st].R; BAT.c4 += L.length;
+  const L = C4S.splice(0), R = STAGES[BAT.st].R * POW.r; BAT.c4 += L.length;
   if (BAT.tut) { lsSet('kp_tut', 1); BAT.tut = 0; showTut(''); }
   hint(''); SND.arm(); bigMsg(tr('boomMsg'), '', '', .9);
   L.forEach((c, j) => later(() => { scene.remove(c.g); explode(c.g.position.clone(), R); }, 260 + j * 55));
@@ -1162,7 +1164,7 @@ $('#loading').remove();
 requestAnimationFrame(frame);
 // テスト用
 window.__kp = {
-  get mode() { return mode; }, get GOLD() { return GOLD; }, REC, AUTO, vidOpen, BLK, BAT, C4S, STAGES, CAM, startStage, placeAt, detonate, undoC4, pct, toTitle, stageList, score, SND, explode, camHome, camera,
+  POW, get mode() { return mode; }, get GOLD() { return GOLD; }, REC, AUTO, vidOpen, BLK, BAT, C4S, STAGES, CAM, startStage, placeAt, detonate, undoC4, pct, toTitle, stageList, score, SND, explode, camHome, camera,
   manual(on) { MANUAL = on; }, tick(dt, draw = true) { stepAll(dt, draw); }, run(n, dt = 1 / 30) { for (let i = 0; i < n; i++) stepAll(dt, i === n - 1); },
   toScreen(v) { const p = v.clone().project(camera); return { x: (p.x + 1) / 2 * VW, y: (1 - p.y) / 2 * VH }; },
 };
