@@ -77,8 +77,11 @@ button.chip{cursor:pointer}
 #boom:active i{transform:translateY(3px)}
 #boom.dis{filter:grayscale(.7) brightness(.8)}
 /* ぷにコン */
-#stick{position:absolute;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:3px solid rgba(255,255,255,.55);background:rgba(20,20,24,.3);pointer-events:none}
-#stick i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:rgba(255,210,31,.85);box-shadow:0 0 14px rgba(255,210,31,.7)}
+#stick{position:absolute;left:calc(env(safe-area-inset-left,0px) + 18px);bottom:calc(env(safe-area-inset-bottom,0px) + 22px);width:132px;height:132px;border-radius:50%;border:3px solid rgba(255,255,255,.55);background:rgba(20,20,24,.38);touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
+#stick::before{content:'';position:absolute;inset:-14px;border-radius:50%}
+#stick.on{border-color:var(--yel);background:rgba(20,20,24,.5)}
+#stick i{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(255,210,31,.85);box-shadow:0 0 14px rgba(255,210,31,.7);pointer-events:none}
+#stick span{position:absolute;left:0;right:0;top:-22px;text-align:center;font-size:11px;font-weight:900;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none}
 
 /* まん中の大きい文字 */
 #msg{position:absolute;left:0;right:0;top:30%;text-align:center;pointer-events:none;padding:0 12px}
@@ -155,7 +158,7 @@ button.chip{cursor:pointer}
   <div id="hint" hidden></div>
   <div id="tut" hidden></div>
   <div id="msg" hidden><div id="msgBig"></div><div id="msgSub"></div></div>
-  <div id="stick" hidden><i id="stickK"></i></div>
+  <div id="stick" hidden><span data-i="move">移動</span><i id="stickK"></i></div>
   <div id="ctl" hidden>
     <button id="undo" data-i="undo">1つ戻す</button>
     <div class="ud"><button id="upBtn" aria-label="up">▲</button><button id="dnBtn" aria-label="down">▼</button></div>
@@ -239,12 +242,12 @@ const TX = {
   ja: {
     title: '木っ端みじん', back: 'もどる', undo: '1つ戻す', boom: '起爆', ruby: 'こっぱみじん', logo: '木っ端<span>みじん</span>', sub: 'C4をくっつけて、起爆。',
     play: '爆破しに行く', rank: 'ランキング', how: '遊び方', sndOn: '音：あり', sndOff: '音：なし', pick: 'どれを吹き飛ばす？', close: 'とじる',
-    how1: '画面の左側をなぞると進む。右側をなぞると見回す。▲▼で上下に飛ぶ', how2: '見えている所をタップすると、そこにC4がくっつく。何個でも置ける', how3: '「起爆」でまとめてドカン。残ったら、またくっつけて起爆できる', how4: 'ブロックの90%を吹き飛ばしたら木っ端みじん。C4が少なく、早いほど高い点',
+    how1: '左下のスティックで進む。画面をなぞると見回す。▲▼で上下に飛ぶ', how2: '見えている所をタップすると、そこにC4がくっつく。何個でも置ける', how3: '「起爆」でまとめてドカン。残ったら、またくっつけて起爆できる', how4: 'ブロックの90%を吹き飛ばしたら木っ端みじん。C4が少なく、早いほど高い点',
     clear: '木っ端みじん！', endSub: '「{s}」を吹き飛ばした', namePh: '名前（12文字まで）', send: '登録', share: 'Xに投稿', next: '次のステージへ', again: 'もう一回', stages: 'ステージ', rankT: 'ランキング',
     st1: '犬小屋', st2: '自転車', st3: '車', st4: 'トラック', st5: '家', st6: 'バス', st7: '2階建ての家', st8: '船', st9: '飛行機', st10: 'ビル',
     pct: 'こなごな {p}%（90%で成功）', c4n: 'C4 {n}個', best: '自己ベスト {v}', noBest: 'まだ壊していない',
-    hintMove: '左側をなぞって進む・右側をなぞって見回す', hintTap: '吹き飛ばしたい所をタップしてC4をくっつけよう', hintBoom: '準備ができたら「起爆」', noC4: 'まずC4をくっつけてね（タップ）', miss: 'そこには付けられない',
-    tut1: '練習：画面の右側をなぞって見回してみよう', tut2: '犬小屋をタップして、C4をくっつけよう', tut3: '赤い「起爆」ボタンを押そう！',
+    hintMove: '左下のスティックで進む・画面をなぞって見回す', move: '移動', hintTap: '吹き飛ばしたい所をタップしてC4をくっつけよう', hintBoom: '準備ができたら「起爆」', noC4: 'まずC4をくっつけてね（タップ）', miss: 'そこには付けられない',
+    tut1: '練習：画面をなぞって見回してみよう', tut2: '犬小屋をタップして、C4をくっつけよう', tut3: '赤い「起爆」ボタンを押そう！',
     boomMsg: 'ドカン！', more: 'まだ残ってる！', moreSub: '追加でくっつけて、もう一回起爆', pts: '点数', c4: 'C4', time: '時間', ptsV: '{v}点', secV: '{v}秒', newBest: '自己ベスト！',
     sending: '登録中…', sent: 'ランキングに載りました', notBest: '自己ベストのほうが高いので、そのままです', sendFail: '登録できませんでした。通信を確かめてね', needName: '名前を入れてね', badName: 'その名前は使えません',
     rEmpty: 'まだだれも木っ端みじんにしていません', rLoading: '読みこみ中…', rFail: 'つながりませんでした',
@@ -253,12 +256,12 @@ const TX = {
   en: {
     title: 'Smithereens', back: 'Back', undo: 'Undo', boom: 'BOOM', ruby: 'KOPPA MIJIN', logo: 'Smither<span>eens</span>', sub: 'Stick on C4. Hit the button.',
     play: 'Go blow stuff up', rank: 'Rankings', how: 'How to play', sndOn: 'Sound: on', sndOff: 'Sound: off', pick: 'What are we blowing up?', close: 'Close',
-    how1: 'Slide on the left side to fly forward, slide on the right side to look around. ▲▼ to go up and down', how2: 'Tap anything you can see to stick C4 there. Place as many as you like', how3: 'Hit BOOM to set them all off. If something is left, stick more and blow it again', how4: 'Blow away 90% of the blocks to reduce it to smithereens. Fewer C4 and less time means more points',
+    how1: 'Use the stick at the bottom left to move, slide on the screen to look around. ▲▼ to go up and down', how2: 'Tap anything you can see to stick C4 there. Place as many as you like', how3: 'Hit BOOM to set them all off. If something is left, stick more and blow it again', how4: 'Blow away 90% of the blocks to reduce it to smithereens. Fewer C4 and less time means more points',
     clear: 'Smithereens!', endSub: 'You blew up the {s}', namePh: 'Your name (up to 12)', send: 'Save', share: 'Post to X', next: 'Next stage', again: 'Again', stages: 'Stages', rankT: 'Rankings',
     st1: 'Doghouse', st2: 'Bicycle', st3: 'Car', st4: 'Truck', st5: 'House', st6: 'Bus', st7: 'Two-story house', st8: 'Ship', st9: 'Airplane', st10: 'Tower',
     pct: 'Shattered {p}% (90% to win)', c4n: 'C4 x{n}', best: 'Best {v}', noBest: 'Not destroyed yet',
-    hintMove: 'Slide left side to move, right side to look', hintTap: 'Tap where you want to stick C4', hintBoom: 'Ready? Hit BOOM', noC4: 'Stick some C4 first (tap)', miss: "Can't stick it there",
-    tut1: 'Practice: slide on the right side to look around', tut2: 'Tap the doghouse to stick C4 on it', tut3: 'Hit the red BOOM button!',
+    hintMove: 'Stick to move, slide the screen to look', move: 'Move', hintTap: 'Tap where you want to stick C4', hintBoom: 'Ready? Hit BOOM', noC4: 'Stick some C4 first (tap)', miss: "Can't stick it there",
+    tut1: 'Practice: slide on the screen to look around', tut2: 'Tap the doghouse to stick C4 on it', tut3: 'Hit the red BOOM button!',
     boomMsg: 'BOOM!', more: 'Still standing!', moreSub: 'Stick more C4 and blow it again', pts: 'Score', c4: 'C4', time: 'Time', ptsV: '{v} pts', secV: '{v} s', newBest: 'New best!',
     sending: 'Saving…', sent: "You're on the rankings", notBest: 'Your best score is higher, so it stays', sendFail: "Couldn't save. Check your connection", needName: 'Enter a name', badName: "That name can't be used",
     rEmpty: 'Nobody has destroyed it yet', rLoading: 'Loading…', rFail: "Couldn't connect",
@@ -267,12 +270,12 @@ const TX = {
   zh: {
     title: '粉身碎骨', back: '返回', undo: '退回1個', boom: '起爆', ruby: 'KOPPA MIJIN', logo: '粉身<span>碎骨</span>', sub: '貼上C4，引爆。',
     play: '去爆破', rank: '排行榜', how: '玩法', sndOn: '聲音：開', sndOff: '聲音：關', pick: '要炸掉哪個？', close: '關閉',
-    how1: '在畫面左側滑動前進，右側滑動環顧四周。▲▼上下飛', how2: '點一下看得到的地方，C4就會貼在那裡。可以放任意個', how3: '按「起爆」一起炸。有剩下的話，可以再貼再炸', how4: '炸飛90%的方塊就是粉身碎骨。C4越少、越快，分數越高',
+    how1: '用左下的搖桿移動，在畫面上滑動環顧四周。▲▼上下飛', how2: '點一下看得到的地方，C4就會貼在那裡。可以放任意個', how3: '按「起爆」一起炸。有剩下的話，可以再貼再炸', how4: '炸飛90%的方塊就是粉身碎骨。C4越少、越快，分數越高',
     clear: '粉身碎骨！', endSub: '炸掉了「{s}」', namePh: '名字（最多12字）', send: '登錄', share: '發到X', next: '下一關', again: '再一次', stages: '關卡', rankT: '排行榜',
     st1: '狗屋', st2: '腳踏車', st3: '汽車', st4: '卡車', st5: '房子', st6: '巴士', st7: '兩層樓房子', st8: '船', st9: '飛機', st10: '大樓',
     pct: '粉碎 {p}%（90%成功）', c4n: 'C4 {n}個', best: '最佳 {v}', noBest: '還沒炸掉',
-    hintMove: '左側滑動前進・右側滑動環顧', hintTap: '點一下想炸的地方貼上C4', hintBoom: '準備好了就「起爆」', noC4: '先貼上C4吧（點一下）', miss: '那裡貼不上',
-    tut1: '練習：在畫面右側滑動環顧四周', tut2: '點一下狗屋，貼上C4', tut3: '按下紅色的「起爆」按鈕！',
+    hintMove: '搖桿移動・滑動畫面環顧', move: '移動', hintTap: '點一下想炸的地方貼上C4', hintBoom: '準備好了就「起爆」', noC4: '先貼上C4吧（點一下）', miss: '那裡貼不上',
+    tut1: '練習：在畫面上滑動環顧四周', tut2: '點一下狗屋，貼上C4', tut3: '按下紅色的「起爆」按鈕！',
     boomMsg: '轟！', more: '還有剩！', moreSub: '再貼上C4，再引爆一次', pts: '分數', c4: 'C4', time: '時間', ptsV: '{v}分', secV: '{v}秒', newBest: '個人最佳！',
     sending: '登錄中…', sent: '登上排行榜了', notBest: '個人最佳比較高，所以不變', sendFail: '無法登錄，請確認網路', needName: '請輸入名字', badName: '這個名字不能使用',
     rEmpty: '還沒有人炸成粉身碎骨', rLoading: '讀取中…', rFail: '無法連線',
@@ -281,12 +284,12 @@ const TX = {
   ko: {
     title: '산산조각', back: '뒤로', undo: '1개 취소', boom: '기폭', ruby: 'KOPPA MIJIN', logo: '산산<span>조각</span>', sub: 'C4를 붙이고, 기폭.',
     play: '폭파하러 가기', rank: '랭킹', how: '하는 법', sndOn: '소리: 켜짐', sndOff: '소리: 꺼짐', pick: '무엇을 날려 버릴까?', close: '닫기',
-    how1: '화면 왼쪽을 문지르면 앞으로, 오른쪽을 문지르면 둘러본다. ▲▼로 위아래로 난다', how2: '보이는 곳을 탭하면 거기에 C4가 붙는다. 몇 개든 놓을 수 있다', how3: '「기폭」으로 한꺼번에 쾅. 남으면 또 붙여서 기폭할 수 있다', how4: '블록의 90%를 날리면 산산조각. C4가 적고 빠를수록 높은 점수',
+    how1: '왼쪽 아래 스틱으로 이동, 화면을 문지르면 둘러본다. ▲▼로 위아래로 난다', how2: '보이는 곳을 탭하면 거기에 C4가 붙는다. 몇 개든 놓을 수 있다', how3: '「기폭」으로 한꺼번에 쾅. 남으면 또 붙여서 기폭할 수 있다', how4: '블록의 90%를 날리면 산산조각. C4가 적고 빠를수록 높은 점수',
     clear: '산산조각!', endSub: '「{s}」을 날려 버렸다', namePh: '이름(12자까지)', send: '등록', share: 'X에 올리기', next: '다음 스테이지', again: '한 번 더', stages: '스테이지', rankT: '랭킹',
     st1: '개집', st2: '자전거', st3: '자동차', st4: '트럭', st5: '집', st6: '버스', st7: '2층집', st8: '배', st9: '비행기', st10: '빌딩',
     pct: '박살 {p}% (90%면 성공)', c4n: 'C4 {n}개', best: '최고 {v}', noBest: '아직 부수지 않았다',
-    hintMove: '왼쪽을 문질러 이동・오른쪽을 문질러 둘러보기', hintTap: '날리고 싶은 곳을 탭해서 C4를 붙이자', hintBoom: '준비되면 「기폭」', noC4: '먼저 C4를 붙여 줘(탭)', miss: '거기에는 붙일 수 없다',
-    tut1: '연습: 화면 오른쪽을 문질러 둘러보자', tut2: '개집을 탭해서 C4를 붙이자', tut3: '빨간 「기폭」 버튼을 눌러!',
+    hintMove: '스틱으로 이동・화면을 문질러 둘러보기', move: '이동', hintTap: '날리고 싶은 곳을 탭해서 C4를 붙이자', hintBoom: '준비되면 「기폭」', noC4: '먼저 C4를 붙여 줘(탭)', miss: '거기에는 붙일 수 없다',
+    tut1: '연습: 화면을 문질러 둘러보자', tut2: '개집을 탭해서 C4를 붙이자', tut3: '빨간 「기폭」 버튼을 눌러!',
     boomMsg: '쾅!', more: '아직 남았다!', moreSub: 'C4를 더 붙이고 한 번 더 기폭', pts: '점수', c4: 'C4', time: '시간', ptsV: '{v}점', secV: '{v}초', newBest: '최고 기록!',
     sending: '등록 중…', sent: '랭킹에 올랐어요', notBest: '최고 기록이 더 높아서 그대로예요', sendFail: '등록하지 못했어요. 통신을 확인해 줘', needName: '이름을 넣어 줘', badName: '그 이름은 쓸 수 없어요',
     rEmpty: '아직 아무도 산산조각 내지 않았어요', rLoading: '불러오는 중…', rFail: '연결하지 못했어요',
@@ -688,52 +691,92 @@ function camHome() {
   const d = V3().subVectors(c, CAM.p); CAM.yaw = Math.atan2(-d.x, -d.z); CAM.pitch = Math.atan2(d.y, Math.hypot(d.x, d.z));
 }
 function camApply() { camera.position.copy(CAM.p); camera.rotation.set(CAM.pitch, CAM.yaw, 0, 'YXZ'); }
-const STK = { id: -1, x0: 0, y0: 0, x: 0, y: 0 }, LOOK = { id: -1, x: 0, y: 0 }, TAPS = new Map(), KEYS = {};
+const STK = { id: -1, x: 0, y: 0, mx: 0, mz: 0 }, LOOK = { id: -1, x: 0, y: 0, x0: 0, y0: 0, on: false }, TAPS = new Map(), KEYS = {};
+// 入力をぜんぶ離した状態にもどす（画面の切りかえ・よそ見・指が消えたとき）
+function inputReset() {
+  for (const k in KEYS) KEYS[k] = false;
+  STK.id = -1; STK.mx = STK.mz = 0; LOOK.id = -1; LOOK.on = false; TAPS.clear(); CAM.up = 0;
+  document.querySelectorAll('.ud button.on').forEach(b => b.classList.remove('on')); stickDraw();
+}
+// 左下のスティック：ここを触っているときだけ進む
+const stickEl = $('#stick');
+function stickDraw() {
+  const R = 46; $('#stickK').style.transform = `translate(${(STK.mx * R).toFixed(1)}px,${(STK.mz * R).toFixed(1)}px)`;
+  stickEl.classList.toggle('on', STK.id >= 0);
+}
+function stickSet(e) {
+  const r = stickEl.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  let dx = e.clientX - cx, dy = e.clientY - cy; const L = Math.hypot(dx, dy), DEAD = 12, FULL = 50;
+  if (L < DEAD) { STK.mx = STK.mz = 0; } else { const k = Math.min(1, (L - DEAD) / (FULL - DEAD)) / L; STK.mx = dx * k; STK.mz = dy * k; }
+  stickDraw();
+}
+stickEl.addEventListener('pointerdown', e => {
+  e.preventDefault(); if (mode !== 'play' || STK.id >= 0) return; audioOn();
+  STK.id = e.pointerId; try { stickEl.setPointerCapture(e.pointerId); } catch (_) { } stickSet(e);
+});
+stickEl.addEventListener('pointermove', e => { if (e.pointerId === STK.id) stickSet(e); });
+const stickOff = e => { if (e.pointerId === STK.id) { STK.id = -1; STK.mx = STK.mz = 0; stickDraw(); } };
+for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) stickEl.addEventListener(ev, stickOff);
+// 画面：なぞると見回す（少し動かしてから回りはじめる）、タップでC4
+const LOOK_START = 8;
 function onDown(e) {
   if (mode !== 'play') return;
   audioOn();
   TAPS.set(e.pointerId, { x: e.clientX, y: e.clientY, t: performance.now(), mv: 0 });
   try { canvas.setPointerCapture(e.pointerId); } catch (_) { }
-  if (e.pointerType === 'mouse' || e.clientX > VW / 2) { if (LOOK.id < 0) Object.assign(LOOK, { id: e.pointerId, x: e.clientX, y: e.clientY }); }
-  else if (STK.id < 0) Object.assign(STK, { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY });
+  if (LOOK.id < 0) Object.assign(LOOK, { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, on: false });
 }
 function onMove(e) {
   const T = TAPS.get(e.pointerId); if (T) T.mv = Math.max(T.mv, Math.hypot(e.clientX - T.x, e.clientY - T.y));
-  if (e.pointerId === LOOK.id) {
-    const k = e.pointerType === 'mouse' ? .0045 : .0062;
-    CAM.yaw -= (e.clientX - LOOK.x) * k; CAM.pitch = clamp(CAM.pitch - (e.clientY - LOOK.y) * k, -1.45, 1.45); LOOK.x = e.clientX; LOOK.y = e.clientY;
-    if (BAT.tut === 1) { BAT.look += Math.abs(e.movementX || 1); if (BAT.look > 140) tutStep(2); }
-  } else if (e.pointerId === STK.id) { STK.x = e.clientX; STK.y = e.clientY; }
+  if (e.pointerId !== LOOK.id || mode !== 'play') return;
+  if (!LOOK.on) { if (Math.hypot(e.clientX - LOOK.x0, e.clientY - LOOK.y0) < LOOK_START) return; LOOK.on = true; LOOK.x = e.clientX; LOOK.y = e.clientY; return; }
+  const k = e.pointerType === 'mouse' ? .0045 : .0062;
+  const dx = e.clientX - LOOK.x, dy = e.clientY - LOOK.y;
+  CAM.yaw -= dx * k; CAM.pitch = clamp(CAM.pitch - dy * k, -1.45, 1.45); LOOK.x = e.clientX; LOOK.y = e.clientY;
+  if (BAT.tut === 1) { BAT.look += Math.abs(dx) + Math.abs(dy); if (BAT.look > 140) tutStep(2); }
 }
 function onUp(e) {
   const T = TAPS.get(e.pointerId); TAPS.delete(e.pointerId);
-  if (e.pointerId === LOOK.id) LOOK.id = -1;
-  if (e.pointerId === STK.id) STK.id = -1;
-  if (mode === 'play' && T && T.mv < 10 && performance.now() - T.t < 450) placeAt(e.clientX, e.clientY);
+  if (e.pointerId === LOOK.id) { LOOK.id = -1; LOOK.on = false; }
+  if (e.type === 'pointerup' && mode === 'play' && T && T.mv < 10 && performance.now() - T.t < 700) placeAt(e.clientX, e.clientY);
 }
 canvas.addEventListener('pointerdown', onDown); canvas.addEventListener('pointermove', onMove);
-canvas.addEventListener('pointerup', onUp); canvas.addEventListener('pointercancel', e => { TAPS.delete(e.pointerId); if (e.pointerId === LOOK.id) LOOK.id = -1; if (e.pointerId === STK.id) STK.id = -1; });
-addEventListener('keydown', e => { KEYS[e.key.toLowerCase()] = true; if (mode === 'play' && (e.key === 'Enter' || e.key.toLowerCase() === 'b')) detonate(); if (mode === 'play' && e.key.toLowerCase() === 'z') undoC4(); });
-addEventListener('keyup', e => { KEYS[e.key.toLowerCase()] = false; });
+canvas.addEventListener('pointerup', onUp); canvas.addEventListener('pointercancel', onUp);
+canvas.addEventListener('lostpointercapture', e => { TAPS.delete(e.pointerId); if (e.pointerId === LOOK.id) { LOOK.id = -1; LOOK.on = false; } });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+// キーボード：日本語入力中でも押しっぱなしにならないよう、キーの場所（code）で見る
+const KEYMAP = { KeyW: 'f', ArrowUp: 'f', KeyS: 'b', ArrowDown: 'b', KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r', Space: 'u', KeyE: 'u', ShiftLeft: 'd', ShiftRight: 'd', KeyQ: 'd' };
+function typing(e) { const t = e.target; return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA'); }
+addEventListener('keydown', e => {
+  if (typing(e) || e.isComposing) return;
+  const m = KEYMAP[e.code];
+  if (m) { KEYS[m] = mode === 'play'; if (mode === 'play') e.preventDefault(); }
+  if (mode !== 'play' || e.repeat) return;
+  if (e.code === 'Enter' || e.code === 'KeyB') { e.preventDefault(); detonate(); }
+  if (e.code === 'KeyZ') undoC4();
+});
+addEventListener('keyup', e => { const m = KEYMAP[e.code]; if (m) KEYS[m] = false; });
+addEventListener('blur', inputReset);
+document.addEventListener('visibilitychange', () => { if (document.hidden) inputReset(); });
 for (const [id, d] of [['#upBtn', 1], ['#dnBtn', -1]]) {
   const b = $(id);
-  b.addEventListener('pointerdown', e => { e.preventDefault(); CAM.up = d; b.classList.add('on'); try { b.setPointerCapture(e.pointerId); } catch (_) { } });
+  b.addEventListener('pointerdown', e => { e.preventDefault(); if (mode !== 'play') return; CAM.up = d; b.classList.add('on'); try { b.setPointerCapture(e.pointerId); } catch (_) { } });
   const off = () => { if (CAM.up === d) CAM.up = 0; b.classList.remove('on'); };
-  b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off);
+  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(ev, off);
+  b.addEventListener('contextmenu', e => e.preventDefault());
 }
+// ボタンを押したあと、スペースキーでもう一度押されないように
+document.querySelectorAll('#ctl button, #hud button').forEach(b => b.addEventListener('click', () => b.blur()));
 function stepCam(dt) {
-  let mx = 0, mz = 0;
-  if (STK.id >= 0) { const dx = STK.x - STK.x0, dy = STK.y - STK.y0, L = Math.hypot(dx, dy); if (L > 6) { const k = Math.min(1, L / 60) / L; mx = dx * k; mz = dy * k; } }
-  const kx = (KEYS.d || KEYS.arrowright ? 1 : 0) - (KEYS.a || KEYS.arrowleft ? 1 : 0), kz = (KEYS.s || KEYS.arrowdown ? 1 : 0) - (KEYS.w || KEYS.arrowup ? 1 : 0);
+  let mx = STK.mx, mz = STK.mz;
+  const kx = (KEYS.r ? 1 : 0) - (KEYS.l ? 1 : 0), kz = (KEYS.b ? 1 : 0) - (KEYS.f ? 1 : 0);
   if (kx || kz) { const L = Math.hypot(kx, kz); mx = kx / L; mz = kz / L; }
-  const up = CAM.up + (KEYS[' '] || KEYS.e ? 1 : 0) - (KEYS.shift || KEYS.q ? 1 : 0);
-  const sp = Math.max(4, BLK.size * .75);
-  // 見ている向きへ進む（上を向いていれば上へも）
-  const f = V3(-Math.sin(CAM.yaw) * Math.cos(CAM.pitch), Math.sin(CAM.pitch), -Math.cos(CAM.yaw) * Math.cos(CAM.pitch)), r = V3(Math.cos(CAM.yaw), 0, -Math.sin(CAM.yaw));
-  CAM.p.addScaledVector(f, -mz * sp * dt).addScaledVector(r, mx * sp * dt); CAM.p.y += up * sp * .7 * dt;
+  const up = CAM.up + (KEYS.u ? 1 : 0) - (KEYS.d ? 1 : 0);
+  const sp = Math.max(3.5, BLK.size * .6);
+  // 進むのは水平だけ（上下は▲▼）
+  const f = V3(-Math.sin(CAM.yaw), 0, -Math.cos(CAM.yaw)), r = V3(Math.cos(CAM.yaw), 0, -Math.sin(CAM.yaw));
+  CAM.p.addScaledVector(f, -mz * sp * dt).addScaledVector(r, mx * sp * dt); CAM.p.y += clamp(up, -1, 1) * sp * .7 * dt;
   const lim = BLK.size * 2.2 + 8; CAM.p.x = clamp(CAM.p.x, BLK.center.x - lim, BLK.center.x + lim); CAM.p.z = clamp(CAM.p.z, BLK.center.z - lim, BLK.center.z + lim); CAM.p.y = clamp(CAM.p.y, .4, BLK.size * 2 + 10);
-  const st = $('#stick'); st.hidden = STK.id < 0;
-  if (STK.id >= 0) { st.style.left = STK.x0 + 'px'; st.style.top = STK.y0 + 'px'; let dx = STK.x - STK.x0, dy = STK.y - STK.y0; const L = Math.hypot(dx, dy); if (L > 50) { dx *= 50 / L; dy *= 50 / L; } $('#stickK').style.transform = `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px)`; }
 }
 function resize() { VW = innerWidth; VH = innerHeight; renderer.setSize(VW, VH, false); camera.aspect = VW / VH; camera.fov = VW / VH < 1 ? 70 : 58; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize);
@@ -763,13 +806,13 @@ function ui() {
   $('#boomN').textContent = C4S.length; $('#boom').classList.toggle('dis', !C4S.length); $('#undo').disabled = !C4S.length;
 }
 function toTitle() {
-  mode = 'title'; clearC4(); loadStage(4); camHome(); showPanel('#title'); hud(false); hint(''); bigMsg(''); showTut('');
+  inputReset(); mode = 'title'; clearC4(); loadStage(4); camHome(); showPanel('#title'); hud(false); hint(''); bigMsg(''); showTut('');
 }
-function hud(on) { $('#hud').hidden = !on; $('#ctl').hidden = !on; if (!on) $('#stick').hidden = true; }
+function hud(on) { $('#hud').hidden = !on; $('#ctl').hidden = !on; $('#stick').hidden = !on; }
 function showTut(t) { const e = $('#tut'); e.textContent = t || ''; e.hidden = !t; }
 function tutStep(n) { if (!BAT.tut || n <= BAT.tut) return; BAT.tut = n; showTut(tr('tut' + n)); hint(''); }
 function startStage(i) {
-  audioOn(); mode = 'play'; BAT.st = i; BAT.t = 0; BAT.c4 = 0; BAT.running = true; BAT.done = false; BAT.checkT = 0; BAT.look = 0;
+  inputReset(); audioOn(); mode = 'play'; BAT.st = i; BAT.t = 0; BAT.c4 = 0; BAT.running = true; BAT.done = false; BAT.checkT = 0; BAT.look = 0;
   clearC4(); TQ.length = 0; FX.splice(0).forEach(f => scene.remove(f.g)); loadStage(i); camHome(); showPanel(null); hud(true); bigMsg(''); ui();
   BAT.tut = i === 0 && !lsGet('kp_tut') ? 1 : 0; showTut(BAT.tut ? tr('tut1') : ''); hint(BAT.tut ? '' : tr('hintTap'));
   history.replaceState(null, '', '?st=' + (i + 1));
@@ -795,7 +838,7 @@ function stepPlay(dt) {
 const score = (c, t) => Math.max(1, Math.round(100000 / (c * 2 + t + 5)));
 let last = null;
 function success() {
-  mode = 'end'; hud(false); hint(''); showTut('');
+  inputReset(); mode = 'end'; hud(false); hint(''); showTut('');
   const i = BAT.st, t = Math.round(BAT.t * 10) / 10, c = BAT.c4, p = score(c, t);
   const b = best(), old = b[i]; const nb = !old || p > old.p; if (nb) { b[i] = { p, c, t }; lsSet('kp_best', b); }
   last = { st: i, p, c, t, ms: Math.round(BAT.t * 1000) };
