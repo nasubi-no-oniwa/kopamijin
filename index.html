@@ -637,6 +637,7 @@ function fireball(p, R) {
   flashL.position.copy(p); flashL.intensity = 260 * Math.max(.5, R / 2); flashL.distance = R * 12;
   SND.boom(Math.min(1, .45 + R / 4)); shake(Math.min(1.2, .35 + R * .18)); flash(.55); buzz([40, 30, 80]);
 }
+const _sw = V3();
 function stepFx(dt) {
   flashL.intensity *= Math.exp(-dt * 9);
   for (let a = FX.length - 1; a >= 0; a--) {
@@ -646,7 +647,14 @@ function stepFx(dt) {
     const pa = f.sparks.geometry.attributes.position;
     for (let i = 0; i < SPK; i++) { const v = f.sv[i]; v[1] -= 9.8 * dt; pa.array[i * 3] += v[0] * dt; pa.array[i * 3 + 1] += v[1] * dt; pa.array[i * 3 + 2] += v[2] * dt; }
     pa.needsUpdate = true; f.sparks.material.opacity = clamp(1 - t / 1.1, 0, 1);
-    for (const s of f.smokes) { const u = t - s.d; if (u < 0) continue; s.m.position.addScaledVector(s.v, dt); s.v.multiplyScalar(Math.exp(-dt * .6)); s.m.scale.setScalar(R * (1 + u * 1.4)); s.m.material.opacity = clamp(u * 3, 0, 1) * clamp(1 - u / 3, 0, 1) * .55; }
+    // 煙：たくさん爆発したときや、カメラのすぐ近くでは薄くして、壊れるところが見えるように
+    const many = .55 / Math.sqrt(Math.max(1, FX.length / 2));
+    for (const s of f.smokes) {
+      const u = t - s.d; if (u < 0) continue; s.m.position.addScaledVector(s.v, dt); s.v.multiplyScalar(Math.exp(-dt * .6));
+      const sc = R * (1 + u * 1.1); s.m.scale.setScalar(sc);
+      s.m.getWorldPosition(_sw); const dc = _sw.distanceTo(camera.position), near = clamp((dc - sc * .35) / (sc * .6), 0, 1);
+      s.m.material.opacity = clamp(u * 3, 0, 1) * clamp(1 - u / 2.6, 0, 1) * many * near;
+    }
     if (t > 3.4) { scene.remove(f.g); f.g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); FX.splice(a, 1); }
   }
 }
