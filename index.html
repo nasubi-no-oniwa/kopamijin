@@ -942,7 +942,8 @@ function placeAt(sx, sy) {
   return true;
 }
 function undoC4() { const c = C4S.pop(); if (!c) return; scene.remove(c.g); SND.click(); ui(); }
-function clearC4() { while (C4S.length) scene.remove(C4S.pop().g); }
+const ARMED = new Set(); // 起爆したが、まだ爆発していないC4
+function clearC4() { while (C4S.length) scene.remove(C4S.pop().g); ARMED.forEach(g => scene.remove(g)); ARMED.clear(); }
 
 /* ===================== 音 ===================== */
 let ac = null, SOUND = lsGet('kp_snd') !== false;
@@ -1126,7 +1127,7 @@ function detonate() {
   const L = C4S.splice(0), R = curR(); BAT.c4 += L.length;
   if (BAT.tut) { lsSet('kp_tut', 1); BAT.tut = 0; showTut(''); }
   hint(''); SND.arm(); bigMsg(tr('boomMsg'), '', '', .9);
-  L.forEach((c, j) => later(() => { scene.remove(c.g); explode(c.g.position.clone(), R); }, 260 + j * 55));
+  L.forEach((c, j) => { ARMED.add(c.g); later(() => { if (!ARMED.delete(c.g)) return; scene.remove(c.g); explode(c.g.position.clone(), R); }, 260 + j * 55); });
   SLOW.t = .9; BAT.checkT = 2.6 + L.length * .055; ui();
   const dur = Math.min(9, 6.6 + L.length * .055); autoStart(dur); recStart(dur);
 }
