@@ -41,7 +41,8 @@
 *,*::before,*::after{box-sizing:border-box}
 html,body{height:100%;margin:0;background:#7cc4f2;color:var(--cream);overflow:hidden;font-family:var(--body);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 html,body{-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
-html,body,button,input,.overlay,.card{touch-action:manipulation}
+html,body{touch-action:none}
+button,input,label,.overlay,.card,.rlist,.wgrid{touch-action:pan-x pan-y}/* 2本指の拡大はさせない（スクロールだけ） */
 [hidden]{display:none!important}
 #app{position:fixed;inset:0}
 #c{width:100%;height:100%;display:block;touch-action:none}
@@ -996,6 +997,11 @@ function inputReset() {
   STK.id = -1; STK.mx = STK.mz = 0; LOOK.id = -1; LOOK.on = false; TAPS.clear(); CAM.up = 0;
   document.querySelectorAll('.ud button.on').forEach(b => b.classList.remove('on')); stickDraw();
 }
+// ブラウザの2本指拡大を止める（ダブルタップ拡大は CSS の touch-action で止める）（iPhoneは user-scalable=no を無視するため）
+for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(ev, e => e.preventDefault(), { passive: false });
+document.addEventListener('touchmove', e => { if (e.cancelable && (e.touches.length > 1 || (e.scale && e.scale !== 1))) e.preventDefault(); }, { passive: false });
+// 万一拡大されてしまっても、指の情報が残って動かなくならないように
+if (window.visualViewport) visualViewport.addEventListener('resize', () => { if (visualViewport.scale > 1.01) inputReset(); });
 // 左下のスティック：ここを触っているときだけ進む
 const stickEl = $('#stick');
 function stickDraw() {
