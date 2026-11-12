@@ -478,6 +478,13 @@ if(document.body)go();else document.addEventListener('DOMContentLoaded',go);
 </div>
 
 <script type="module">
+
+// Xの投稿で引用するツイート（なすびのお庭の管理ページ quote/ で日本語・英語を貼りかえられる）
+var NQ=window.__nq||(window.__nq={q:{}});if(!NQ.f){NQ.f=1;fetch('https://ft-red-default-rtdb.asia-southeast1.firebasedatabase.app/xquote/g/kopamijin.json').then(r=>r.json()).then(d=>{if(d&&typeof d==='object')NQ.q=d;}).catch(()=>{});}
+function quoteURL(){let l='';try{if(typeof lang==='string')l=lang;}catch(e){}if(!l)l=document.documentElement.lang||'ja';const u=(l.slice(0,2)==='ja'?NQ.q.ja:NQ.q.en)||'';return /^https:\/\/x\.com\/[A-Za-z0-9_]{1,15}\/status\/\d{5,25}$/.test(u)?u:'';}
+function xIntent(text,url){const q=quoteURL();return 'https://x.com/intent/post?text='+encodeURIComponent(q?text+'\n'+url:text)+'&url='+encodeURIComponent(q||url);}
+function xIntentT(text){const q=quoteURL();return 'https://x.com/intent/post?text='+encodeURIComponent(text)+(q?'&url='+encodeURIComponent(q):'');}
+function nqS(o){const q=quoteURL();if(!q||!o)return o;o=Object.assign({},o);o.text=(o.text||'')+(o.url?'\n'+o.url:'')+'\n'+q;delete o.url;return o;}
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
 const $ = s => document.querySelector(s);
@@ -1229,7 +1236,7 @@ $('#share').onclick = () => {
   if (!last) return;
   const W = last.wk, text = W ? tr('shareWk', { n: W.n || tr('noName'), c: last.c, t: last.t.toFixed(1), p: last.p }) + (W.code ? '\n' + tr('codeLine', { c: W.code }) : '') + '\n' + tr('tags') + '\n' + (W.code ? GAME_URL + '?w=' + W.code : GAME_URL)
     : tr('shareT', { s: stName(last.st), c: last.c, t: last.t.toFixed(1), p: last.p }) + '\n' + tr('tags') + '\n' + GAME_URL + '?st=' + (last.st + 1);
-  open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  open(xIntentT(text), '_blank', 'noopener');
 };
 document.querySelectorAll('.langs button').forEach(b => b.onclick = () => { LANG = b.dataset.lang; lsSet('kp_lang', LANG); applyLang(); });
 
@@ -1741,7 +1748,7 @@ $('#wdPost').onclick = async () => {
   finally { $('#wdPost').disabled = false; }
 };
 function workLink(code) { return GAME_URL + '?w=' + code; }
-function postWorkX(W) { const text = tr('sharePost', { n: W.n, c: W.code }) + '\n' + tr('tags') + '\n' + workLink(W.code); open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank', 'noopener'); }
+function postWorkX(W) { const text = tr('sharePost', { n: W.n, c: W.code }) + '\n' + tr('tags') + '\n' + workLink(W.code); open(xIntentT(text), '_blank', 'noopener'); }
 async function copyLink(code, note) { try { await navigator.clipboard.writeText(workLink(code)); note.textContent = tr('copied'); note.className = 'note ok'; } catch (_) { note.textContent = workLink(code); } }
 $('#wdX').onclick = () => postWorkX(ED.work);
 $('#wdCopy').onclick = () => copyLink(ED.work.code, $('#wdMsg'));
@@ -2113,12 +2120,12 @@ async function vidShare() {
   if (touch && navigator.share) {
     try {
       const f = new File([REC.last.blob], vidName(), { type: REC.last.blob.type });
-      if (!navigator.canShare || navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], text }); return; }
+      if (!navigator.canShare || navigator.canShare({ files: [f] })) { await navigator.share(nqS({ files: [f], text })); return; }
     } catch (e) { if (e && e.name === 'AbortError') return; }
   }
   // パソコン：保存して、投稿画面を開く（動画は自分で添付）
   vidSave(); $('#vidNote').textContent = tr('vidPc'); $('#vidNote').className = 'note ok';
-  open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  open(xIntentT(text), '_blank', 'noopener');
 }
 $('#vidBtn').onclick = () => vidOpen();
 $('#endVid').onclick = () => vidOpen();
